@@ -1,0 +1,5 @@
+langgraph
+jinja2
+playwright
+dotenv
+langchain-groq
