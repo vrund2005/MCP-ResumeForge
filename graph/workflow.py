@@ -8,6 +8,7 @@ graph = StateGraph(RoastForgeState)
 
 
 graph.add_node("text_cleaning_node", text_cleaning_node)
+graph.add_node("roast_node", roast_node)
 graph.add_node("ats_node", ats_node)
 graph.add_node("research_node", research_node)
 graph.add_node("new_resume_node", new_resume_node)
@@ -18,7 +19,9 @@ graph.add_node("questions_node", questions_node)
 
 
 graph.add_edge(START, "text_cleaning_node")
+graph.add_edge("text_cleaning_node", "roast_node")
 graph.add_edge("text_cleaning_node", "ats_node")
+graph.add_edge("roast_node", END)
 graph.add_conditional_edges(
     "ats_node",
     end_or_not,

@@ -80,6 +80,13 @@ class ImprovementItem(BaseModel):
     what_is_weak: str
     why_it_hurts: str
     how_to_fix_it: str
+    
+
+class RoastResponse(BaseModel):
+    roast: str = Field(
+        ...,
+        description="Short brutal but funny roast of the resume in 3-4 punchy lines"
+    )
 
 
 class ImprovementResponse(BaseModel):

@@ -1,4 +1,4 @@
-from graph.state import RoastForgeState,ATSResponse,ImprovementResponse,ResumeSchema,InterviewQuestionsResponse
+from graph.state import RoastForgeState,ATSResponse,ImprovementResponse,ResumeSchema,InterviewQuestionsResponse,RoastResponse
 from services.llm import model,llm1,llm2
 
 def text_cleaning_node(state: RoastForgeState):
@@ -369,4 +369,56 @@ def increment_iteration_node(state: RoastForgeState):
 
     return {
         "iteration": current_iteration + 1
+    }
+
+def roast_node(state: RoastForgeState):
+    """
+    Generate a short savage roast of the resume.
+
+    Input:
+        state["pdf_text"]
+
+    Output:
+        {
+            "roast": str
+        }
+    """
+
+    if state.get("new_resume"):
+        resume_content = str(state["new_resume"])
+    else:
+        resume_content = state.get("pdf_text")
+
+    if not resume_content:
+        raise ValueError("Resume content not found for roast generation")
+
+    structured_llm = llm2.with_structured_output(RoastResponse)
+
+    prompt = f"""
+    You are a savage roast comedian reviewing a resume.
+
+    Your job is to roast this profile in 3-4 punchy brutal lines.
+
+    Rules:
+
+    - Be funny
+    - Be accurate
+    - Be sharp
+    - Be brutal
+    - No generic jokes
+    - Roast based on actual resume weaknesses
+    - Keep it short and memorable
+
+    Do not give advice.
+    Do not be polite.
+    Return only the roast.
+
+    Resume:
+    {resume_content}
+    """
+
+    result = structured_llm.invoke(prompt)
+
+    return {
+        "roast": result.roast
     }

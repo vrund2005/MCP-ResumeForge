@@ -35,11 +35,12 @@ async def resume_ats_optimizer_and_pdf_generator(resume_text: str, target_role: 
 
     response = {
         "final_ats_score": result.get("ATS_score"),
+        "ats_history": result.get("all_ats_scores"),
         "interview_questions": result.get("questions"),
+        "roast" : result.get("roast"),
         "generated_pdf_filename": result.get("generated_pdf_filename"),
         "generated_pdf_mime_type": result.get("generated_pdf_mime_type"),
-        "generated_pdf_base64": result.get("generated_pdf_base64"),
-        "ats_history": result.get("all_ats_scores")
+        "generated_pdf_base64": result.get("generated_pdf_base64")
     }
 
     pdf_base64 = result.get("generated_pdf_base64")
