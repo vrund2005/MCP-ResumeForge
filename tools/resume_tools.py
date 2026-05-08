@@ -1,4 +1,7 @@
 from graph.workflow import roastforge
+from fastmcp.tools import ToolResult
+from fastmcp.utilities.types import File
+import base64
 
 async def resume_ats_optimizer_and_pdf_generator(resume_text: str, target_role: str = "AI/ML Engineer"):
     """
@@ -16,7 +19,8 @@ async def resume_ats_optimizer_and_pdf_generator(resume_text: str, target_role: 
         {
             "final_ats_score": int,
             "interview_questions": list[str],
-            "generated_pdf_path": str,
+            "generated_pdf_filename": str,
+            "generated_pdf_base64": pdf_base64,
             "ats_history": list[int]
         }
     """
@@ -29,10 +33,27 @@ async def resume_ats_optimizer_and_pdf_generator(resume_text: str, target_role: 
 
     result = await roastforge.ainvoke(initial_state)
 
-    return {
+    response = {
         "final_ats_score": result.get("ATS_score"),
         "interview_questions": result.get("questions"),
-        "generated_pdf_filename": result.get("filename","NO_PDF_GENERATED: ATS score above threshold (82 > 80)"),
-        "generated_pdf_base64": result.get("pdf_base64","NO_PDF_GENERATED: ATS score above threshold (82 > 80)"),
+        "generated_pdf_filename": result.get("generated_pdf_filename"),
+        "generated_pdf_mime_type": result.get("generated_pdf_mime_type"),
+        "generated_pdf_base64": result.get("generated_pdf_base64"),
         "ats_history": result.get("all_ats_scores")
     }
+
+    pdf_base64 = result.get("generated_pdf_base64")
+    if not pdf_base64:
+        response["message"] = "Resume already met the ATS threshold, so no optimized PDF was generated."
+        return response
+
+    filename = result.get("generated_pdf_filename", "optimized_resume.pdf")
+    pdf_bytes = base64.b64decode(pdf_base64)
+
+    return ToolResult(
+        content=[
+            "Optimized resume PDF generated successfully.",
+            File(data=pdf_bytes, format="pdf", name=filename.removesuffix(".pdf")),
+        ],
+        structured_content=response,
+    )

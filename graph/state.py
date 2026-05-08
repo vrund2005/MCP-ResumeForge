@@ -60,6 +60,8 @@ class RoastForgeState(TypedDict, total=False):
 
     generated_pdf_base64: str
     generated_pdf_filename: str
+    generated_pdf_mime_type: str
+    generated_pdf_path: str
 
     from pydantic import BaseModel, Field
 

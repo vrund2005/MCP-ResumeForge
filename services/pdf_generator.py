@@ -17,6 +17,9 @@ async def download_pdf_node(state: RoastForgeState):
 
     Output:
         {
+            "generated_pdf_filename": str,
+            "generated_pdf_mime_type": str,
+            "generated_pdf_base64": str,
             "generated_pdf_path": str
         }
     """
@@ -306,6 +309,19 @@ async def download_pdf_node(state: RoastForgeState):
     pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
 
     return {
+        "message": "PDF generated successfully",
         "generated_pdf_filename": filename,
-        "generated_pdf_base64": pdf_base64
+        "generated_pdf_mime_type": "application/pdf",
+        "generated_pdf_base64": pdf_base64,
+        "generated_pdf_path": file_path
     }
+
+    # with open(file_path, "rb") as f:
+    #     pdf_bytes = f.read()
+
+    # pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
+
+    # return {
+    #     "generated_pdf_filename": filename,
+    #     "generated_pdf_base64": pdf_base64
+    # }
