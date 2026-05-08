@@ -3,7 +3,7 @@ from playwright.async_api import async_playwright
 from graph.state import RoastForgeState,ResumeSchema
 import os
 import base64
-import tempfile
+from datetime import datetime
 
 async def download_pdf_node(state: RoastForgeState):
     """
@@ -20,7 +20,8 @@ async def download_pdf_node(state: RoastForgeState):
             "generated_pdf_filename": str,
             "generated_pdf_mime_type": str,
             "generated_pdf_base64": str,
-            "generated_pdf_path": str
+            "generated_pdf_path": str,
+            "generated_pdf_preview_png_base64": str
         }
     """
 
@@ -34,11 +35,13 @@ async def download_pdf_node(state: RoastForgeState):
     else:
         resume_data = dict(new_resume)
 
-    filename = "roastforge_resume.pdf"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"roastforge_resume_{timestamp}.pdf"
 
-    # Use writable temp directory instead of current directory
-    temp_dir = tempfile.gettempdir()
-    file_path = os.path.join(temp_dir, filename)
+    output_dir = os.path.abspath(os.path.join(os.getcwd(), "generated_pdfs"))
+    os.makedirs(output_dir, exist_ok=True)
+    file_path = os.path.join(output_dir, filename)
+    preview_path = os.path.join(output_dir, f"roastforge_resume_preview_{timestamp}.png")
 
     HTML_TEMPLATE = """
     <!DOCTYPE html>
@@ -301,27 +304,25 @@ async def download_pdf_node(state: RoastForgeState):
             }
         )
 
+        await page.screenshot(path=preview_path, full_page=True)
+
         await browser.close()
 
     with open(file_path, "rb") as f:
         pdf_bytes = f.read()
 
+    with open(preview_path, "rb") as f:
+        preview_bytes = f.read()
+
     pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
+    preview_base64 = base64.b64encode(preview_bytes).decode("utf-8")
 
     return {
         "message": "PDF generated successfully",
         "generated_pdf_filename": filename,
         "generated_pdf_mime_type": "application/pdf",
         "generated_pdf_base64": pdf_base64,
-        "generated_pdf_path": file_path
+        "generated_pdf_path": file_path,
+        "generated_pdf_preview_png_path": preview_path,
+        "generated_pdf_preview_png_base64": preview_base64
     }
-
-    # with open(file_path, "rb") as f:
-    #     pdf_bytes = f.read()
-
-    # pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
-
-    # return {
-    #     "generated_pdf_filename": filename,
-    #     "generated_pdf_base64": pdf_base64
-    # }

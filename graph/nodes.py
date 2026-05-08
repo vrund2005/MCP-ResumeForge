@@ -1,5 +1,6 @@
 from graph.state import RoastForgeState,ATSResponse,ImprovementResponse,ResumeSchema,InterviewQuestionsResponse,RoastResponse
 from services.llm import model,llm1,llm2
+from services.structured_output import invoke_structured
 
 def text_cleaning_node(state: RoastForgeState):
     """
@@ -68,8 +69,6 @@ def ats_node(state: RoastForgeState):
     if not resume_content:
         raise ValueError("Resume content not found for ATS evaluation")
 
-    structured_llm = model.with_structured_output(ATSResponse)
-
     prompt = f"""
     You are a brutally strict ATS evaluator for 2026 hiring standards.
 
@@ -105,7 +104,7 @@ def ats_node(state: RoastForgeState):
     {resume_content}
     """
 
-    result = structured_llm.invoke(prompt)
+    result = invoke_structured(model, ATSResponse, prompt)
 
     return {
         "ATS_score": result.ats_score,
@@ -139,8 +138,6 @@ def research_node(state: RoastForgeState):
 
     if not resume_content:
         raise ValueError("Resume content not found for research analysis")
-
-    structured_llm = model.with_structured_output(ImprovementResponse)
 
     prompt = f"""
     You are a ruthless senior hiring manager reviewing a resume.
@@ -185,7 +182,7 @@ def research_node(state: RoastForgeState):
     {resume_content}
     """
 
-    result = structured_llm.invoke(prompt)
+    result = invoke_structured(model, ImprovementResponse, prompt)
 
     return {
         "improvements": result.model_dump()
@@ -269,8 +266,7 @@ def new_resume_node(state: RoastForgeState):
     Improvement Analysis:
     {improvements}
     """
-    llm_new_resume = llm1.with_structured_output(ResumeSchema)
-    result = llm_new_resume.invoke(prompt)
+    result = invoke_structured(llm1, ResumeSchema, prompt)
 
     return {
         "new_resume": result,
@@ -342,8 +338,7 @@ def questions_node(state: RoastForgeState):
     {resume_content}
     """
 
-    interview_structured_llm = model.with_structured_output(InterviewQuestionsResponse)
-    result = interview_structured_llm.invoke(prompt)
+    result = invoke_structured(model, InterviewQuestionsResponse, prompt)
 
     return {
         "questions": result.questions
@@ -392,8 +387,6 @@ def roast_node(state: RoastForgeState):
     if not resume_content:
         raise ValueError("Resume content not found for roast generation")
 
-    structured_llm = llm2.with_structured_output(RoastResponse)
-
     prompt = f"""
     You are a savage roast comedian reviewing a resume.
 
@@ -417,7 +410,7 @@ def roast_node(state: RoastForgeState):
     {resume_content}
     """
 
-    result = structured_llm.invoke(prompt)
+    result = invoke_structured(llm2, RoastResponse, prompt)
 
     return {
         "roast": result.roast
