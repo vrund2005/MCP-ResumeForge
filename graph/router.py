@@ -33,13 +33,13 @@ def end_or_not(state: RoastForgeState):
     max_iteration = state.get("max_iteration", 3)
     has_improved_resume = bool(state.get("new_resume"))
 
-    if has_improved_resume and ats_score >= 80:
+    if has_improved_resume and ats_score >= 90:
         return "download_pdf"
 
     if iteration >= max_iteration:
         return "download_pdf"
 
-    if ats_score >= 80:
+    if ats_score >= 90:
         return "good"
 
     return "not_good"
