@@ -2,7 +2,7 @@ from fastmcp import FastMCP
 from tools.resume_tools import resume_ats_optimizer_and_pdf_generator
 import asyncio
 
-mcp = FastMCP("ResumeForge")
+mcp = FastMCP("Vrund's ResumeForge")
 
 mcp.tool()(resume_ats_optimizer_and_pdf_generator)
 

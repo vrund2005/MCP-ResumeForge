@@ -32,6 +32,7 @@ async def resume_ats_optimizer_and_pdf_generator(resume_text: str, target_role: 
     return {
         "final_ats_score": result.get("ATS_score"),
         "interview_questions": result.get("questions"),
-        "generated_pdf_path": result.get("generated_pdf_path","NO_PDF_GENERATED: ATS score above threshold (82 > 80)"),
+        "generated_pdf_filename": result.get("filename","NO_PDF_GENERATED: ATS score above threshold (82 > 80)"),
+        "generated_pdf_base64": result.get("pdf_base64","NO_PDF_GENERATED: ATS score above threshold (82 > 80)"),
         "ats_history": result.get("all_ats_scores")
     }

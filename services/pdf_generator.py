@@ -1,6 +1,9 @@
 from jinja2 import Template
 from playwright.async_api import async_playwright
 from graph.state import RoastForgeState,ResumeSchema
+import os
+import base64
+import tempfile
 
 async def download_pdf_node(state: RoastForgeState):
     """
@@ -28,7 +31,11 @@ async def download_pdf_node(state: RoastForgeState):
     else:
         resume_data = dict(new_resume)
 
-    file_path = "roastforge_resume.pdf"
+    filename = "roastforge_resume.pdf"
+
+    # Use writable temp directory instead of current directory
+    temp_dir = tempfile.gettempdir()
+    file_path = os.path.join(temp_dir, filename)
 
     HTML_TEMPLATE = """
     <!DOCTYPE html>
@@ -293,6 +300,12 @@ async def download_pdf_node(state: RoastForgeState):
 
         await browser.close()
 
+    with open(file_path, "rb") as f:
+        pdf_bytes = f.read()
+
+    pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
+
     return {
-        "generated_pdf_path": file_path
+        "generated_pdf_filename": filename,
+        "generated_pdf_base64": pdf_base64
     }
